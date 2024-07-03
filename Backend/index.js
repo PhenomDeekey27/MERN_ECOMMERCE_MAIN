@@ -19,11 +19,32 @@ const Usermodel = require("./Models/UserModel.js")
 const orderModel = require("./Models/OrderSchema.js")
 
 const PaymentModal=require("./Models/PaymentSchema.js")
-
-
+const path=require('path')
+const _dirname=path.dirname("")
+// const buildPath=path.join(_dirname,"../Frontend/dist")
 const app=express();
-app.use(cors())
+//whatsapp
+const whatsAppClient = require('@green-api/whatsapp-api-client')
+const idInstance=process.env.ID_INSTANCE
+const apiTokenInstance =process.env.TOKEN_INSTANCE
+
+//nodemailer
+
+const nodemailer = require('nodemailer');
+const { info } = require("console")
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // e.g., 'gmail'
+    auth: {
+      user: process.env.USER_EMAIL,
+      pass: process.env.USER_PASSWORD,
+    }
+  });
+
 app.use(express.static("dist"))
+
+app.use(cors())
+
 
 app.use(express.json({
     limit:"50mb"
@@ -55,7 +76,8 @@ app.get('/',(req,res)=>{
 //signup routes
 
 app.post("/api/signup",async(req,res)=>{
-    const{name,email,password,ProfilePic}=req.body;
+    const{name,email,password,ProfilePic,Phone}=req.body;
+    console.log(req.body)
  
     //checking for user's data format error
     try {
@@ -91,7 +113,7 @@ app.post("/api/signup",async(req,res)=>{
         //creating the new user 
 
         const Userobj=new UserModel({
-            name,email,password:hashedPassWord,ProfilePic,role:"GENERAL"
+            name,email,password:hashedPassWord,ProfilePic,role:"GENERAL",Phone
 
         })
         //saving the user on the mongoDb
@@ -188,7 +210,7 @@ app.post("/api/login",async(req,res)=>{
 
 app.get("/api/check",authToken,async(req,res)=>{
    try {
-    console.log(typeof(req.userId))
+   
     const User = await Usermodel.findById(req.userId)
     if(!User){
         return res.send({
@@ -465,7 +487,7 @@ app.post("/api/addtocart",authToken,async(req,res)=>{
             
 
         }
-        console.log(payload)
+    
 
         const addtocart = new Cart(payload)
         const SavedProduct= await addtocart.save()
@@ -488,7 +510,7 @@ app.post("/api/addtocart",authToken,async(req,res)=>{
 })
 app.post("/api/cartcount",async(req,res)=>{
     const{UserId}=req.body
-    console.log(UserId)
+    
 
     const CartDetails=await Cart.countDocuments({UserId})
  
@@ -577,7 +599,7 @@ app.post("/api/search_query-product",async(req,res)=>{
     try {
 
         const query=req.query.q
-        console.log(query)
+       
         const regex= new RegExp(query,"i","g")
         const product=await ProductModel.find({
             "$or":[
@@ -693,7 +715,7 @@ app.post("/api/payment_order",(req,res)=>{
                 return res.status(500).json({ message: "Something Went Wrong!" });
             }
             res.status(200).json({ data: order });
-            console.log("order",order)
+            
         });
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error!" });
@@ -706,20 +728,18 @@ app.post("/api/payment_order",(req,res)=>{
 app.post("/api/verify_order",async(req,res)=>{
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-    console.log("req.body", req.body);
+    
 
     try {
         // Create Sign
         const sign = razorpay_order_id + "|" + razorpay_payment_id;
-        console.log(process.env.RAZORPAY_KEY_SECRET,"Secret")
-        console.log(typeof(process.env.RAZORPAY_KEY_SECRET))
+       
 
         // Create ExpectedSign
         const expectedSign = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
             .update(sign.toString())
             .digest("hex");
 
-        console.log(razorpay_signature === expectedSign,"verification");
 
         // Create isAuthentic
         const isAuthentic = expectedSign === razorpay_signature;
@@ -785,6 +805,89 @@ app.post('/api/fetch-payment', async (req, res) => {
 
 
   })
+
+  //send whatsapp message
+
+//   app.post("/api/send_msg",async(req,res)=>{
+//     const {phone,message}=req.body
+//     const restAPI = whatsAppClient.restAPI(({
+//         idInstance,
+//         apiTokenInstance
+//     }))
+//     try {
+//         const response = await restAPI.message.sendMessage(`${phone}@c.us`, null,message);
+        
+//         console.log(response)
+//         return res.send({
+//             status:200,
+//             messge:"ok"
+//         })
+//     } catch (ex) {
+//         console.error(ex);
+//     }
+//   })
+//for nodemailer
+app.post("/api/send_email",async(req,res)=>{
+
+    const {orderDetails}=req.body
+    console.log(orderDetails,"Details")
+
+    const mailOptions = {
+        from: process.env.USER_EMAIL,
+        to:"toptucker271@gmail.com",
+        subject: `New Order: ${orderDetails.orderId}`,
+        text: `You have a new order:
+               Order ID: ${orderDetails.orderId}
+               Customer: ${orderDetails.customerName}
+               Total: ${orderDetails.Total}
+               Items: ${orderDetails.Items.map(item => `${item.BrandName} - ${item.ProductName} - ${item.Quantity}`).join(', ')},
+               Time:${Date.now().toLocaleString(
+                'en-US', {
+                    weekday: 'long', // "Monday"
+                    year: 'numeric', // "2023"
+                    month: 'long', // "July"
+                    day: 'numeric', // "3"
+                    hour: '2-digit', // "09"
+                    minute: '2-digit', // "08"
+                    second: '2-digit', // "07"
+                    hour12: true // "AM/PM" format
+                    }
+
+               )}`
+    };
+    try {
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.log('Error sending email: ', error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
+
+          return res.send({
+            status:200,
+            message:"email send successfully",
+           
+          })
+
+        
+    } catch (error) {
+        return res.send({
+            status:400,
+            error:error.message
+        })
+        
+    }
+
+    
+
+
+      
+
+
+})
+
 
 app.listen(PORT,()=>{
     console.log(`Server is running on ${PORT}`)

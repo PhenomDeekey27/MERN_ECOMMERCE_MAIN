@@ -16,6 +16,9 @@ const UserSchema=new mongoose.Schema({
     ProfilePic:{
         type:String
     },
+    Phone:{
+        type:String
+    },
     Role:{
         type:String,
         default:"General"

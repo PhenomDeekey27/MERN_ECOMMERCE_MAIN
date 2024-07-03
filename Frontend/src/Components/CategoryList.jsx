@@ -12,7 +12,7 @@ const CategoryList = () => {
     const getProductbyCategory=async()=>{
         setLoading(true)
         const products=await axios.get("/api/Product_Categories")
-        console.log(products.data)
+      
         setCategoryProduct(products.data.data)
      
      setLoading(false)

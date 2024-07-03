@@ -200,7 +200,7 @@ const handlePaymentVerify = async (data) => {
                 );
 
                 console.log("pay",res.data)
-                console.log(res,"res")
+               
                 if(res.status===200){
                        const cartItems=await axios.post("/api/checkout",{
                         UserId:UserId
@@ -266,6 +266,30 @@ const getPaymentType=async(data)=>{
     }
 )
     console.log(NewOrders.data)
+        console.log(NewOrders.data.totalAmount,NewOrders.data.shipping_options)
+
+    const OrderDetails={
+        orderId:fetchpaymentData.data.order_id,
+        email:User.data.email,
+        customerName:User.data.name,
+        Total:TotalPrice,
+        Items:CartProducts
+
+    }
+
+    const sendMail=await axios.post("/api/send_email",{
+        orderDetails:OrderDetails
+    })
+
+    console.log("Mail",sendMail)
+
+    // const SendWhatsAppMsg = await axios.post("/api/send_msg",{
+    //     phone:User.data.Phone,
+    //     message:`Order of OrderID:${fetchpaymentData.data.order_id} was placed by ${User.data.name} from 
+    //     ${User.data.email} for Rupees ${Number(fetchpaymentData.data.amount/100)}`
+    // })
+
+    // console.log("WhatsApp",SendWhatsAppMsg)
 
 
 

@@ -23,7 +23,8 @@ const Signup = () => {
     email:"",
     password:"",
     cpassword:"",
-    ProfilePic:""
+    ProfilePic:"",
+    Phone:""
   })
 
   const handleInputChange=(e)=>{
@@ -39,6 +40,7 @@ const Signup = () => {
     if(formData.password ===formData.cpassword){
       try {
         const response=await axios.post("/api/signup",formData)
+        console.log(response.data)
      
         if(response.data.status!=201){
         enqueueSnackbar(response.data.message,{variant:"error"})
@@ -141,6 +143,18 @@ const Signup = () => {
              
              
           </div>
+          
+        
+          
+        </div>
+        <div className="mt-2">
+          <label htmlFor="password">Enter Your Mobile Number</label>
+          <div className="relative flex items-center ">
+              <input type="tel" placeholder="+91-9876543210" pattern="(\+91-)?[0-9]{10}" className="outline-none w-full"  onChange={handleInputChange} name="Phone" value={formData.phone} required/>
+            
+             
+          </div>
+          
         
           
         </div>

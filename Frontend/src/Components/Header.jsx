@@ -97,12 +97,14 @@ const [search, setsearch] = useState(SearchQuery)
           <div className="relative group flex justify-center">
           <div className="text-2xl text-orange-600 cursor-pointer" onClick={()=>setdisplay(!display)}>
             {
-              User!=null && User.status ==200  ? 
+              User!=null && User.status ==200 && User.data.ProfilePic!=""  ? 
               (<img src={User.data.ProfilePic} alt="Img" className="w-10 h-10 rounded-full"></img>)
               :
               ( <FaUser></FaUser>)
 
             }
+
+            
            
         
         

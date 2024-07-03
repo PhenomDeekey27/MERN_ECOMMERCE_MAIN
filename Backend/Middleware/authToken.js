@@ -2,7 +2,7 @@ const jwt=require("jsonwebtoken")
 const authToken=async(req,res,next)=>{
     try {
         const token= req.cookies.token 
-        console.log('Token',token)
+       
 
         //checking here if the token is available or not
 
