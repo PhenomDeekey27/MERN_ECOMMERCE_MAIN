@@ -16,13 +16,13 @@ const Orderpage = () => {
   const getCurrentOrders=async()=>{
     const orders=await axios.get("/api/current_orders")
    
-    setCurrentOrders(orders.data.data)
+    setCurrentOrders(orders?.data.data)
     console.log(CurrentOrders)
 
   }
   useEffect(()=>{
     getCurrentOrders()
-    cartDetails(User.data._id)
+    cartDetails(User?.data?._id)
    
     
   },[])

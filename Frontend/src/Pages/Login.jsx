@@ -49,11 +49,9 @@ const Login = () => {
     try {
 
       const loginUrl = await axios.post("/api/login",formData);
+      console.log(loginUrl.data)
 
-      if(loginUrl.data.status!==200){
-        enqueueSnackbar(loginUrl.data.message,{variant:"error"})
-      }else{
-        
+      if(loginUrl.data.status===200){
         enqueueSnackbar(loginUrl.data.message,{variant:"success",anchorOrigin:{
           vertical:"top",
           horizontal:"right"
@@ -62,6 +60,16 @@ const Login = () => {
         console.log(loginData)
         dispatch(setUserDetails(loginData))
         navigate("/")
+       
+      }else if(loginUrl.data.status==400){
+        enqueueSnackbar("ok",{variant:"error"})
+
+      }
+      else{
+        enqueueSnackbar(loginUrl.data.message,{variant:"error"})
+        enqueueSnackbar("ok",{variant:"error"})
+      
+        
 
       }
 
@@ -69,6 +77,7 @@ const Login = () => {
       
     } catch (error) {
       enqueueSnackbar(error.message,{variant:'error'})
+      console.log(error)
       
     }
 

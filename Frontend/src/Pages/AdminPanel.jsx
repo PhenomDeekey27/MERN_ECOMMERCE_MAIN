@@ -44,6 +44,9 @@ const AdminPanel = () => {
               <nav>
                 <Link to="all-Users">User Role</Link>
               </nav>
+              <nav>
+                <Link to="all-orders">All Orders</Link>
+              </nav>
             </div>
          
       </aside>

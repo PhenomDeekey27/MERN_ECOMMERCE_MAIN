@@ -41,6 +41,17 @@ const transporter = nodemailer.createTransport({
     }
   });
 
+  //for telegram
+const TelegramBot = require('node-telegram-bot-api');
+const token = process.env.TELEGRAM_BOT;
+const bot = new TelegramBot(process.env.TELEGRAM_BOT, {polling: true});
+// bot.on('message', (msg) => {
+//     const chatId = msg.chat.id;
+//     console.log(`Chat ID: ${chatId}`);
+//     bot.sendMessage(chatId, 'okie');
+//   })
+
+
 app.use(express.static("dist"))
 
 app.use(cors())
@@ -778,10 +789,10 @@ app.post('/api/fetch-payment', async (req, res) => {
     }
   });
   app.post("/api/create_orders",async(req,res)=>{
-    const{productDetails,email,paymentDetails,totalAmount,userId}=req.body
+    const{productDetails,email,paymentDetails,totalAmount,userId,OrderId}=req.body
     try {
         const Orders=new orderModel({
-            productDetails,email,paymentDetails,totalAmount,userId
+            productDetails,email,paymentDetails,totalAmount,userId,OrderId
            
         })
     
@@ -832,28 +843,41 @@ app.post("/api/send_email",async(req,res)=>{
     const {orderDetails}=req.body
     console.log(orderDetails,"Details")
 
+    const now = Date.now();
+    const date = new Date(now);
+    
+    // Extract individual components
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2); // Months are zero-based
+    const day = ('0' + date.getDate()).slice(-2);
+    
+    let hours = date.getHours();
+    const minutes = ('0' + date.getMinutes()).slice(-2);
+    const seconds = ('0' + date.getSeconds()).slice(-2);
+    
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert hours from 24-hour to 12-hour format
+    hours = hours % 12;
+    hours = hours ? hours : 12; // The hour '0' should be '12'
+    hours = ('0' + hours).slice(-2); // Ensure two digits
+    
+    // Custom format: "YYYY-MM-DD HH:MM:SS AM/PM"
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${ampm}`;
+    
+
+
+
     const mailOptions = {
-        from: process.env.USER_EMAIL,
-        to:"toptucker271@gmail.com",
+        from: orderDetails.email,
+        to:"krangan415@gmail.com",
         subject: `New Order: ${orderDetails.orderId}`,
         text: `You have a new order:
                Order ID: ${orderDetails.orderId}
                Customer: ${orderDetails.customerName}
-               Total: ${orderDetails.Total}
+               TotalAmount: ${orderDetails.Total} rupees
                Items: ${orderDetails.Items.map(item => `${item.BrandName} - ${item.ProductName} - ${item.Quantity}`).join(', ')},
-               Time:${Date.now().toLocaleString(
-                'en-US', {
-                    weekday: 'long', // "Monday"
-                    year: 'numeric', // "2023"
-                    month: 'long', // "July"
-                    day: 'numeric', // "3"
-                    hour: '2-digit', // "09"
-                    minute: '2-digit', // "08"
-                    second: '2-digit', // "07"
-                    hour12: true // "AM/PM" format
-                    }
-
-               )}`
+               Time:${formattedDate}`
     };
     try {
 
@@ -880,10 +904,75 @@ app.post("/api/send_email",async(req,res)=>{
         
     }
 
+})
+
+//admin for getting all the orders
+app.get("/api/get_allOrders",async(req,res)=>{
+    try {
+        const AllOrders=await orderModel.find().sort({createdAt:-1})
+
+        return res.send({
+            status:200,
+            data:AllOrders,
+            message:"Order Fetched Successfully"
+        })
+        
+    } catch (error) {
+        return res.send({
+            status:400,
+            error:error
+        })
+        
+    }
+  
+
+        
+})
+
+// api for sending the telegram messages
+
+// app.post("/api/send_msg",async(req,res)=>{
+
+//     try {
+//         bot.sendMessage(868674006,"Sambu")
+//         return res.send({
+//         status:200,
+//         message:"success"
+//     })
+
+        
+//     } catch (error) {
+//         return res.send({
+//             status:400,
+//             message:error
+//         })
+        
+//     }
+
     
+// })
 
+app.post("/api/send_msg",async(req,res)=>{
+    const {msg}=req.body;
+    
+        bot.sendMessage("868674006",msg).then(()=>{
+            console.log("success")
+            return res.send({
+                status:200,
+                data:msg,
+                message:"data send successfull"
+            })
 
-      
+        }).catch((er)=>{
+            console.log(er)
+            return res.send({
+                status:400,
+                error:er || er.message
+            })
+        })
+       
+        
+    
 
 
 })

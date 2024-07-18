@@ -141,8 +141,6 @@ const checkout=async()=>{
     handlePayment()
    
 
-
-
 }
 
 useEffect(()=>{
@@ -150,6 +148,17 @@ useEffect(()=>{
     
     
   },[CartCount,cartDetails])
+
+
+  const sendMsg=async(data)=>{
+    const ordermsg=await axios.post("/api/send_msg",{
+        msg:data
+
+    })
+
+    console.log(ordermsg.data)
+
+  }
 
 
   const handlePayment = async () => {
@@ -262,11 +271,12 @@ const getPaymentType=async(data)=>{
                 email:User.data.email,
                 totalAmount:TotalPrice,
                 paymentDetails:paymentDetails,
-                userId:User.data._id
+                userId:User.data._id,
+                OrderId:fetchpaymentData.data.order_id
     }
 )
     console.log(NewOrders.data)
-        console.log(NewOrders.data.totalAmount,NewOrders.data.shipping_options)
+    
 
     const OrderDetails={
         orderId:fetchpaymentData.data.order_id,
@@ -282,6 +292,12 @@ const getPaymentType=async(data)=>{
     })
 
     console.log("Mail",sendMail)
+
+    const sendMsg=await axios.post("/api/send_msg",{
+        msg:JSON.stringify(OrderDetails,null,2)
+    })
+
+    console.log(sendMsg.data)
 
     // const SendWhatsAppMsg = await axios.post("/api/send_msg",{
     //     phone:User.data.Phone,

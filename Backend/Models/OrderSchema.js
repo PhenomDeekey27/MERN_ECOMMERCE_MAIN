@@ -36,6 +36,9 @@ const orderSchema=new mongoose.Schema({
     },
     userId:{
         type:String
+    },
+    OrderId:{
+        type:String
     }
 },{
     timestamps:true

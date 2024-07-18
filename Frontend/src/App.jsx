@@ -22,6 +22,7 @@ import SearchProduct from "./Pages/SearchProduct"
 import Success from "./Pages/Success"
 import Cancel from "./Pages/Cancel"
 import Orderpage from "./Pages/Orderpage"
+import AdminOrders from "./Pages/AdminOrders"
 
 
 
@@ -73,6 +74,7 @@ const App = () => {
           <Route path="/adminPanel" element={<AdminPanel></AdminPanel>}>
             <Route path="all-products" element={<AllProducts></AllProducts>}></Route>
             <Route path="all-users" element={<UserRole></UserRole>}></Route>
+            <Route path="all-orders" element={<AdminOrders></AdminOrders>}></Route>
           
           </Route>
           <Route path="/product-category" element={<CategoryProduct></CategoryProduct>}></Route>
